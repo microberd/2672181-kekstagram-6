@@ -4,7 +4,7 @@ function checkStringLength (ourString, maxLength) {
     return true;
   }
   return false;
-};
+}
 checkStringLength('лунтик', 20);
 checkStringLength('уга буга', 2);
 checkStringLength('пустой лес', 10);
@@ -19,7 +19,8 @@ function isPalindrome (firstString) {
   else {
     return false;
   }
-};
+}
+
 isPalindrome('топот');
 isPalindrome('ДовОд');
 isPalindrome('Кекс');

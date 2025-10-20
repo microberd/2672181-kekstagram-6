@@ -24,6 +24,5 @@ const createPhoto = (index) => ({
 });
 
 const generatePhotos = () => Array.from({length: 25}, (_, index) => createPhoto(index));
-const photos = generatePhotos();
-
+export const photos = generatePhotos();
 
