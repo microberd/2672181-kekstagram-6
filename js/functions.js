@@ -24,3 +24,29 @@ function isPalindrome (firstString) {
 isPalindrome('топот');
 isPalindrome('ДовОд');
 isPalindrome('Кекс');
+
+/*
+'8:00' - начало рабочего дня
+'17:30' - конец рабочего дня
+'14:00' - начало встречи
+90 - продолжительность встречи в минутах
+*/
+
+function isMeetingWithinWorkHours(workStart, workEnd, meetingStart, meetingDuration) {
+  function timeToMinutes(time) {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours*60 + minutes;
+  }
+
+  const workStartMinutes = timeToMinutes(workStart);
+  const workEndMinutes = timeToMinutes(workEnd);
+  const meetingStartMinutes = timeToMinutes(meetingStart);
+  const meetingEndMinutes = meetingStartMinutes + meetingDuration;
+  return meetingStartMinutes >= workStartMinutes && meetingEndMinutes <= workEndMinutes;
+}
+
+/* Примеры проверок
+console.log(isMeetingWithinWorkHours('08:00', '17:30', '14:00', 90)); // true
+console.log(isMeetingWithinWorkHours('8:0', '10:0', '8:0', 120)); // true
+console.log(isMeetingWithinWorkHours('08:00', '14:30', '14:00', 90)); // false
+*/
