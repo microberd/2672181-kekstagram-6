@@ -1,22 +1,31 @@
 import { photos } from './main.js';
+import { showBigPhoto } from './fullscreen.js';
 
-function makePhotoElement(photo) {
+function createPhotoElement(data) {
   const template = document.querySelector('#picture').content;
   const element = template.cloneNode(true);
-  element.querySelector('.picture__img').src = photo.url;
-  element.querySelector('.picture__img').alt = photo.description;
-  element.querySelector('.picture__likes').textContent = photo.likes;
-  element.querySelector('.picture__comments').textContent = photo.comments.length;
+
+  element.querySelector('.picture__img').src = data.url;
+  element.querySelector('.picture__img').alt = data.description;
+  element.querySelector('.picture__likes').textContent = data.likes;
+  element.querySelector('.picture__comments').textContent = data.comments.length;
+
+  element.querySelector('.picture').addEventListener('click', () => {
+    showBigPhoto(data.id);
+  });
+
   return element;
 }
 
-function showPhotos() {
-  const picturesContainer = document.querySelector('.pictures');
+function displayPhotos() {
+  const container = document.querySelector('.pictures');
   const fragment = document.createDocumentFragment();
-  for (let i = 0; i < photos.length; i++) {
-    const photoElement = makePhotoElement(photos[i]);
-    fragment.appendChild(photoElement);
-  }
-  picturesContainer.appendChild(fragment);
+
+  photos.forEach((item) => {
+    fragment.appendChild(createPhotoElement(item));
+  });
+
+  container.appendChild(fragment);
 }
-export { showPhotos };
+
+export { displayPhotos };

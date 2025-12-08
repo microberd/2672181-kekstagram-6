@@ -26,9 +26,9 @@ const createPhoto = (index) => ({
 const generatePhotos = () => Array.from({length: 25}, (_, index) => createPhoto(index));
 //export const photos = generatePhotos();
 
-import { showPhotos } from './thumbnails.js';
+import { displayPhotos } from './thumbnails.js';
 
 const photos = generatePhotos();
-showPhotos();
+displayPhotos();
 
 export { photos };
