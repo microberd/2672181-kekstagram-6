@@ -1,4 +1,5 @@
 //import Pristine from '/vendor/pristine/pristine.min.js';
+import {resetEffects, updateScale } from './effects.js';
 
 const form = document.querySelector('.img-upload__form');
 const uploadInput = document.querySelector('.img-upload__input');
@@ -40,6 +41,8 @@ form.addEventListener('submit', (evt) => {
 uploadInput.addEventListener('change', () => {
   overlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
+  updateScale();
+  resetEffects();
 });
 
 function closeForm() {

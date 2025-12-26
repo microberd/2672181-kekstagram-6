@@ -177,7 +177,6 @@
           </div>
         </div>
 
-        <!-- Кнопка для выхода из полноэкранного просмотра изображения -->
         <button type="reset" class="big-picture__cancel  cancel" id="picture-cancel">Закрыть</button>
       </div>
     </section>
@@ -196,7 +195,6 @@
     </div>
   </footer>
 
-  <!-- Шаблон изображения случайного пользователя -->
   <template id="picture">
     <a href="#" class="picture">
       <img class="picture__img" src="" width="182" height="182" alt="Случайная фотография">
@@ -207,7 +205,6 @@
     </a>
   </template>
 
-  <!-- Сообщение с ошибкой загрузки изображения -->
   <template id="error">
     <section class="error">
       <div class="error__inner">
@@ -217,7 +214,6 @@
     </section>
   </template>
 
-  <!-- Сообщение об успешной загрузке изображения -->
   <template id="success">
     <section class="success">
       <div class="success__inner">
@@ -227,12 +223,15 @@
     </section>
   </template>
 
-  <!-- Экран загрузки изображения -->
   <template id="messages">
     <div class="img-upload__message  img-upload__message--loading">Загружаем...</div>
   </template>
   <script src="https://cdn.jsdelivr.net/npm/pristinejs@0.1.9/dist/pristine.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.6.1/dist/nouislider.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/nouislider@15.6.1/dist/nouislider.min.js"></script>
+
+  <script type="module" src="js/effects.js"></script>
   <script type="module" src="js/form.js"></script>
-  <script src="js/main.js" type="module"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
