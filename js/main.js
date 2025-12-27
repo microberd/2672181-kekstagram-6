@@ -1,5 +1,6 @@
 import { loadPhotos } from './api.js';
 import { displayPhotos } from './thumbnails.js';
+import { initFilters } from './filters.js';
 
 function showLoadError(message) {
   const errorContainer = document.createElement('div');
@@ -53,13 +54,14 @@ function showLoadError(message) {
   document.body.append(errorContainer);
 }
 
-async function initializeApp() {
+async function startApp() {
   try {
     const photos = await loadPhotos();
     displayPhotos(photos);
+    initFilters(photos);
   } catch (error) {
     showLoadError(error.message);
   }
 }
 
-initializeApp();
+startApp();

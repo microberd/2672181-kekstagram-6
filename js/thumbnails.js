@@ -1,33 +1,43 @@
 import { showBigPhoto } from './fullscreen.js';
 
-function createPhotoElement(data) {
-  const template = document.querySelector('#picture').content;
-  const element = template.cloneNode(true);
+const picturesContainer = document.querySelector('.pictures');
+const pictureTemplate = document.querySelector('#picture').content;
 
-  element.querySelector('.picture__img').src = data.url;
-  element.querySelector('.picture__img').alt = data.description;
-  element.querySelector('.picture__likes').textContent = data.likes;
-  element.querySelector('.picture__comments').textContent = data.comments.length;
+function createPhotoElement(photo) {
+  const element = pictureTemplate.cloneNode(true);
+  const img = element.querySelector('.picture__img');
+  const likes = element.querySelector('.picture__likes');
+  const comments = element.querySelector('.picture__comments');
+
+  img.src = photo.url;
+  img.alt = photo.description;
+  likes.textContent = photo.likes;
+  comments.textContent = photo.comments.length;
 
   element.querySelector('.picture').addEventListener('click', () => {
-    showBigPhoto(data);
+    showBigPhoto(photo);
   });
-
   return element;
 }
 
-function displayPhotos(photosData) {
-  const container = document.querySelector('.pictures');
-  const fragment = document.createDocumentFragment();
-
-  const existingPictures = container.querySelectorAll('.picture');
-  existingPictures.forEach((picture) => picture.remove());
-
-  photosData.forEach((item) => {
-    fragment.appendChild(createPhotoElement(item));
-  });
-
-  container.appendChild(fragment);
+function clearPhotos() {
+  const pictures = picturesContainer.querySelectorAll('.picture');
+  pictures.forEach((picture) => picture.remove());
 }
 
-export { displayPhotos };
+function showPhotos(photos) {
+  clearPhotos();
+
+  const fragment = document.createDocumentFragment();
+  photos.forEach((photo) => {
+    fragment.appendChild(createPhotoElement(photo));
+  });
+
+  picturesContainer.appendChild(fragment);
+}
+
+function displayPhotos(photos) {
+  showPhotos(photos);
+}
+
+export { displayPhotos, showPhotos };
