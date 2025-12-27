@@ -1,11 +1,8 @@
-import { photos } from './main.js';
-
 let currentComments = [];
 let shownComments = 0;
 const COMMENTS_PER_PAGE = 5;
 
-function showBigPhoto(photoId) {
-  const photoData = photos.find((item) => item.id === photoId);
+function showBigPhoto(photoData) {
   const bigPic = document.querySelector('.big-picture');
   bigPic.querySelector('.big-picture__img img').src = photoData.url;
   bigPic.querySelector('.big-picture__img img').alt = photoData.description;

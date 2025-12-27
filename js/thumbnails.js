@@ -1,4 +1,3 @@
-import { photos } from './main.js';
 import { showBigPhoto } from './fullscreen.js';
 
 function createPhotoElement(data) {
@@ -11,17 +10,20 @@ function createPhotoElement(data) {
   element.querySelector('.picture__comments').textContent = data.comments.length;
 
   element.querySelector('.picture').addEventListener('click', () => {
-    showBigPhoto(data.id);
+    showBigPhoto(data);
   });
 
   return element;
 }
 
-function displayPhotos() {
+function displayPhotos(photosData) {
   const container = document.querySelector('.pictures');
   const fragment = document.createDocumentFragment();
 
-  photos.forEach((item) => {
+  const existingPictures = container.querySelectorAll('.picture');
+  existingPictures.forEach((picture) => picture.remove());
+
+  photosData.forEach((item) => {
     fragment.appendChild(createPhotoElement(item));
   });
 
