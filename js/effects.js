@@ -1,11 +1,13 @@
+import '../vendor/nouislider.js';
+
 const scaleValue = document.querySelector('.scale__control--value');
 const scaleSmaller = document.querySelector('.scale__control--smaller');
 const scaleBigger = document.querySelector('.scale__control--bigger');
 const previewImage = document.querySelector('.img-upload__preview img');
-const effectLevel = document.querySelector('.effect-level__value');
-const effectLevelContainer = document.querySelector('.img-upload__effect-level');
 const effectsList = document.querySelector('.effects__list');
-
+const effectLevel = document.querySelector('.img-upload__effect-level');
+const effectLevelValue = document.querySelector('.effect-level__value');
+const effectLevelSlider = document.querySelector('.effect-level__slider');
 let currentScale = 100;
 let currentEffect = 'none';
 
@@ -14,115 +16,131 @@ function updateScale() {
   previewImage.style.transform = `scale(${currentScale / 100})`;
 }
 
-scaleSmaller.addEventListener('click', () => {
+function resetScale() {
+  currentScale = 100;
+  updateScale();
+}
+
+function onScaleSmallerClick() {
   if (currentScale > 25) {
     currentScale -= 25;
     updateScale();
   }
-});
+}
 
-scaleBigger.addEventListener('click', () => {
+function onScaleBiggerClick() {
   if (currentScale < 100) {
     currentScale += 25;
     updateScale();
   }
-});
+}
 
-const effects = {
-  none: {
-    filter: '',
-    unit: '',
-    options: { min: 0, max: 0, step: 0 }
-  },
-  chrome: {
-    filter: 'grayscale',
-    unit: '',
-    options: { min: 0, max: 1, step: 0.1 }
-  },
-  sepia: {
-    filter: 'sepia',
-    unit: '',
-    options: { min: 0, max: 1, step: 0.1 }
-  },
-  marvin: {
-    filter: 'invert',
-    unit: '%',
-    options: { min: 0, max: 100, step: 1 }
-  },
-  phobos: {
-    filter: 'blur',
-    unit: 'px',
-    options: { min: 0, max: 3, step: 0.1 }
-  },
-  heat: {
-    filter: 'brightness',
-    unit: '',
-    options: { min: 1, max: 3, step: 0.1 }
-  }
-};
+function createSlider() {
+  noUiSlider.create(effectLevelSlider, {
+    range: {
+      min: 0,
+      max: 100
+    },
+    start: 100,
+    step: 1,
+    connect: 'lower',
+    format: {
+      to: function (value) {
+        return value.toFixed(0);
+      },
+      from: function (value) {
+        return parseFloat(value);
+      }
+    }
+  });
 
-let slider = null;
+  effectLevelSlider.noUiSlider.on('update', (values, handle) => {
+    effectLevelValue.value = values[handle];
+    applyEffect();
+  });
+}
 
-function initSlider() {
-  currentEffect = 'none';
-  const originalEffect = document.querySelector('#effect-none');
-  if (originalEffect) {
-    originalEffect.checked = true;
-  }
+function applyEffect() {
+  const value = parseInt(effectLevelValue.value, 10);
 
-  if (slider) {
-    slider.destroy();
-  }
-
-  effectLevelContainer.classList.add('hidden');
+  previewImage.className = '';
   previewImage.style.filter = '';
-  effectLevel.value = '';
+
+  switch (currentEffect) {
+    case 'chrome':
+      previewImage.style.filter = `grayscale(${value / 100})`;
+      previewImage.classList.add('effects__preview--chrome');
+      break;
+    case 'sepia':
+      previewImage.style.filter = `sepia(${value / 100})`;
+      previewImage.classList.add('effects__preview--sepia');
+      break;
+    case 'marvin':
+      previewImage.style.filter = `invert(${value}%)`;
+      previewImage.classList.add('effects__preview--marvin');
+      break;
+    case 'phobos':
+      previewImage.style.filter = `blur(${value * 3 / 100}px)`;
+      previewImage.classList.add('effects__preview--phobos');
+      break;
+    case 'heat':
+      previewImage.style.filter = `brightness(${1 + value * 2 / 100})`;
+      previewImage.classList.add('effects__preview--heat');
+      break;
+    default:
+      previewImage.className = '';
+      previewImage.style.filter = '';
+  }
+}
+
+function onEffectChange(evt) {
+  if (!evt.target.classList.contains('effects__radio')) {
+    return;
+  }
+
+  currentEffect = evt.target.value;
+
+  if (currentEffect === 'none') {
+    effectLevel.classList.add('hidden');
+    previewImage.className = '';
+    previewImage.style.filter = '';
+  } else {
+    effectLevel.classList.remove('hidden');
+    effectLevelSlider.noUiSlider.updateOptions({
+      range: {
+        min: 0,
+        max: 100
+      },
+      start: 100,
+      step: 1
+    });
+    applyEffect();
+  }
 }
 
 function resetEffects() {
-  initSlider();
-}
+  currentEffect = 'none';
+  const noneEffect = effectsList.querySelector('#effect-none');
+  if (noneEffect) {
+    noneEffect.checked = true;
+  }
+  effectLevel.classList.add('hidden');
+  previewImage.className = '';
+  previewImage.style.filter = '';
 
-effectsList.addEventListener('change', (evt) => {
-  if (evt.target.name === 'effect') {
-    currentEffect = evt.target.value;
-
-    if (slider) {
-      slider.destroy();
-    }
-
-    if (currentEffect === 'none') {
-      effectLevelContainer.classList.add('hidden');
-      previewImage.style.filter = '';
-      effectLevel.value = '';
-      return;
-    }
-
-    effectLevelContainer.classList.remove('hidden');
-
-    slider = noUiSlider.create(document.querySelector('.effect-level__slider'), {
-      range: {
-        min: effects[currentEffect].options.min,
-        max: effects[currentEffect].options.max
-      },
-      start: effects[currentEffect].options.max,
-      step: effects[currentEffect].options.step,
-      connect: 'lower'
-    });
-
-    slider.on('update', (values) => {
-      const value = values[0];
-      effectLevel.value = value;
-
-      const effect = effects[currentEffect];
-      if (effect.filter) {
-        previewImage.style.filter = `${effect.filter}(${value}${effect.unit})`;
-      }
+  if (effectLevelSlider.noUiSlider) {
+    effectLevelSlider.noUiSlider.updateOptions({
+      start: 100
     });
   }
-});
+}
 
-updateScale();
-initSlider();
+scaleSmaller.addEventListener('click', onScaleSmallerClick);
+scaleBigger.addEventListener('click', onScaleBiggerClick);
+effectsList.addEventListener('change', onEffectChange);
 
-export { updateScale, resetEffects };
+createSlider();
+resetScale();
+resetEffects();
+
+export { resetEffects, updateScale, resetScale };

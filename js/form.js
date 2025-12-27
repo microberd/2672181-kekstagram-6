@@ -1,5 +1,5 @@
 import { sendForm } from './api.js';
-import { resetEffects, updateScale } from './effects.js';
+import { resetEffects, resetScale } from './effects.js';
 
 const form = document.querySelector('.img-upload__form');
 const uploadInput = document.querySelector('.img-upload__input');
@@ -79,9 +79,7 @@ function handleFormSubmit(evt) {
         closeForm();
         showSuccessMessage();
       })
-      .catch(() => {
-        // Ошибка уже обработана в sendForm
-      })
+      .catch(() => {})
       .finally(() => {
         unblockSubmitButton();
       });
@@ -100,6 +98,10 @@ uploadInput.addEventListener('change', () => {
   const file = uploadInput.files[0];
 
   if (file) {
+    if (previewImage.src.startsWith('blob:')) {
+      URL.revokeObjectURL(previewImage.src);
+    }
+
     const imageUrl = URL.createObjectURL(file);
     previewImage.src = imageUrl;
 
@@ -110,7 +112,7 @@ uploadInput.addEventListener('change', () => {
 
   overlay.classList.remove('hidden');
   document.body.classList.add('modal-open');
-  updateScale();
+  resetScale();
   resetEffects();
 });
 
@@ -120,6 +122,7 @@ function closeForm() {
   form.reset();
   pristine.reset();
   resetEffects();
+  resetScale();
 
   if (previewImage.src.startsWith('blob:')) {
     URL.revokeObjectURL(previewImage.src);
