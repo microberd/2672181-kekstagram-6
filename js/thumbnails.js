@@ -5,24 +5,28 @@ const pictureTemplate = document.querySelector('#picture').content;
 
 function createPhotoElement(photo) {
   const element = pictureTemplate.cloneNode(true);
-  const img = element.querySelector('.picture__img');
+  const image = element.querySelector('.picture__img');
   const likes = element.querySelector('.picture__likes');
   const comments = element.querySelector('.picture__comments');
 
-  img.src = photo.url;
-  img.alt = photo.description;
+  image.src = photo.url;
+  image.alt = photo.description;
   likes.textContent = photo.likes;
   comments.textContent = photo.comments.length;
 
-  element.querySelector('.picture').addEventListener('click', () => {
+  const pictureElement = element.querySelector('.picture');
+  pictureElement.addEventListener('click', () => {
     showBigPhoto(photo);
   });
+
   return element;
 }
 
 function clearPhotos() {
   const pictures = picturesContainer.querySelectorAll('.picture');
-  pictures.forEach((picture) => picture.remove());
+  pictures.forEach((picture) => {
+    picture.remove();
+  });
 }
 
 function showPhotos(photos) {

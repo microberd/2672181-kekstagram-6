@@ -1,4 +1,5 @@
 import '../vendor/nouislider.js';
+const { noUiSlider } = window;
 
 const scaleValue = document.querySelector('.scale__control--value');
 const scaleSmaller = document.querySelector('.scale__control--smaller');
@@ -8,7 +9,13 @@ const effectsList = document.querySelector('.effects__list');
 const effectLevel = document.querySelector('.img-upload__effect-level');
 const effectLevelValue = document.querySelector('.effect-level__value');
 const effectLevelSlider = document.querySelector('.effect-level__slider');
-let currentScale = 100;
+
+const DEFAULT_SCALE = 100;
+const SCALE_STEP = 25;
+const MIN_SCALE = 25;
+const MAX_SCALE = 100;
+
+let currentScale = DEFAULT_SCALE;
 let currentEffect = 'none';
 
 function updateScale() {
@@ -17,51 +24,40 @@ function updateScale() {
 }
 
 function resetScale() {
-  currentScale = 100;
+  currentScale = DEFAULT_SCALE;
   updateScale();
 }
 
 function onScaleSmallerClick() {
-  if (currentScale > 25) {
-    currentScale -= 25;
+  if (currentScale > MIN_SCALE) {
+    currentScale -= SCALE_STEP;
     updateScale();
   }
 }
 
 function onScaleBiggerClick() {
-  if (currentScale < 100) {
-    currentScale += 25;
+  if (currentScale < MAX_SCALE) {
+    currentScale += SCALE_STEP;
     updateScale();
   }
 }
 
 function createSlider() {
   noUiSlider.create(effectLevelSlider, {
-    range: {
-      min: 0,
-      max: 100
-    },
+    range: { min: 0, max: 100 },
     start: 100,
     step: 1,
-    connect: 'lower',
-    format: {
-      to: function (value) {
-        return value.toFixed(0);
-      },
-      from: function (value) {
-        return parseFloat(value);
-      }
-    }
+    connect: 'lower'
   });
 
-  effectLevelSlider.noUiSlider.on('update', (values, handle) => {
-    effectLevelValue.value = values[handle];
+  effectLevelSlider.noUiSlider.on('update', () => {
+    effectLevelValue.value = effectLevelSlider.noUiSlider.get();
     applyEffect();
   });
 }
 
 function applyEffect() {
-  const value = parseInt(effectLevelValue.value, 10);
+  const value = parseFloat(effectLevelValue.value);
 
   previewImage.className = '';
   previewImage.style.filter = '';
@@ -69,27 +65,20 @@ function applyEffect() {
   switch (currentEffect) {
     case 'chrome':
       previewImage.style.filter = `grayscale(${value / 100})`;
-      previewImage.classList.add('effects__preview--chrome');
       break;
     case 'sepia':
       previewImage.style.filter = `sepia(${value / 100})`;
-      previewImage.classList.add('effects__preview--sepia');
       break;
     case 'marvin':
       previewImage.style.filter = `invert(${value}%)`;
-      previewImage.classList.add('effects__preview--marvin');
       break;
     case 'phobos':
       previewImage.style.filter = `blur(${value * 3 / 100}px)`;
-      previewImage.classList.add('effects__preview--phobos');
       break;
     case 'heat':
       previewImage.style.filter = `brightness(${1 + value * 2 / 100})`;
-      previewImage.classList.add('effects__preview--heat');
       break;
     default:
-      previewImage.className = '';
-      previewImage.style.filter = '';
   }
 }
 
@@ -106,14 +95,13 @@ function onEffectChange(evt) {
     previewImage.style.filter = '';
   } else {
     effectLevel.classList.remove('hidden');
+
     effectLevelSlider.noUiSlider.updateOptions({
-      range: {
-        min: 0,
-        max: 100
-      },
+      range: { min: 0, max: 100 },
       start: 100,
       step: 1
     });
+
     applyEffect();
   }
 }
@@ -129,9 +117,7 @@ function resetEffects() {
   previewImage.style.filter = '';
 
   if (effectLevelSlider.noUiSlider) {
-    effectLevelSlider.noUiSlider.updateOptions({
-      start: 100
-    });
+    effectLevelSlider.noUiSlider.updateOptions({ start: 100 });
   }
 }
 
@@ -143,4 +129,4 @@ createSlider();
 resetScale();
 resetEffects();
 
-export { resetEffects, updateScale, resetScale };
+export { resetEffects, resetScale };

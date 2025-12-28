@@ -1,15 +1,35 @@
 import { showPhotos } from './thumbnails.js';
 
-const filters = document.querySelector('.img-filters');
-const filterButtons = filters.querySelectorAll('.img-filters__button');
+const RANDOM_PHOTOS_COUNT = 10;
+const DEBOUNCE_DELAY = 500;
+
+const FilterType = {
+  DEFAULT: 'filter-default',
+  RANDOM: 'filter-random',
+  DISCUSSED: 'filter-discussed'
+};
 
 let allPhotos = [];
-let currentFilter = 'default';
+let currentFilter = FilterType.DEFAULT;
 let timeoutId = null;
 
 function getRandomPhotos(photos) {
-  const shuffled = [...photos].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 10);
+  const selectedIndexes = new Set();
+  const result = [];
+
+  if (photos.length <= RANDOM_PHOTOS_COUNT) {
+    return [...photos];
+  }
+
+  while (selectedIndexes.size < RANDOM_PHOTOS_COUNT) {
+    const randomIndex = Math.floor(Math.random() * photos.length);
+    if (!selectedIndexes.has(randomIndex)) {
+      selectedIndexes.add(randomIndex);
+      result.push(photos[randomIndex]);
+    }
+  }
+
+  return result;
 }
 
 function getDiscussedPhotos(photos) {
@@ -17,11 +37,11 @@ function getDiscussedPhotos(photos) {
 }
 
 function applyFilter() {
-  let filteredPhotos = [];
+  let filteredPhotos;
 
-  if (currentFilter === 'random') {
+  if (currentFilter === FilterType.RANDOM) {
     filteredPhotos = getRandomPhotos(allPhotos);
-  } else if (currentFilter === 'discussed') {
+  } else if (currentFilter === FilterType.DISCUSSED) {
     filteredPhotos = getDiscussedPhotos(allPhotos);
   } else {
     filteredPhotos = allPhotos;
@@ -31,8 +51,14 @@ function applyFilter() {
 }
 
 function debounceFilter() {
-  clearTimeout(timeoutId);
-  timeoutId = setTimeout(applyFilter, 500);
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+  }
+
+  timeoutId = setTimeout(() => {
+    applyFilter();
+    timeoutId = null;
+  }, DEBOUNCE_DELAY);
 }
 
 function onFilterClick(evt) {
@@ -42,23 +68,23 @@ function onFilterClick(evt) {
     return;
   }
 
-  filterButtons.forEach((btn) => {
+  document.querySelectorAll('.img-filters__button').forEach((btn) => {
     btn.classList.remove('img-filters__button--active');
   });
 
   button.classList.add('img-filters__button--active');
-
-  currentFilter = button.id.replace('filter-', '');
-
+  currentFilter = button.id;
   debounceFilter();
 }
 
 function initFilters(photos) {
   allPhotos = photos;
 
+  const filters = document.querySelector('.img-filters');
   filters.classList.remove('img-filters--inactive');
 
-  filterButtons.forEach((button) => {
+  const buttons = document.querySelectorAll('.img-filters__button');
+  buttons.forEach((button) => {
     button.addEventListener('click', onFilterClick);
   });
 }
