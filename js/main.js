@@ -1,9 +1,10 @@
 import { loadPhotos } from './api.js';
 import { displayPhotos } from './thumbnails.js';
-import { initFilters } from './filters.js';
+import { initializePhotoFilters } from './filters.js';
 
-function showLoadError(message) {
+function displayLoadingError(errorText) {
   const errorContainer = document.createElement('div');
+  errorContainer.className = 'data-error';
   errorContainer.style.cssText = `
     position: fixed;
     top: 50%;
@@ -19,10 +20,10 @@ function showLoadError(message) {
     font-family: 'Open Sans', Arial, sans-serif;
   `;
 
-  const errorText = document.createElement('p');
-  errorText.textContent = message;
-  errorText.style.margin = '0 0 15px 0';
-  errorText.style.fontSize = '18px';
+  const errorMessage = document.createElement('p');
+  errorMessage.textContent = errorText;
+  errorMessage.style.margin = '0 0 15px 0';
+  errorMessage.style.fontSize = '18px';
 
   const reloadButton = document.createElement('button');
   reloadButton.textContent = 'Обновить страницу';
@@ -50,18 +51,18 @@ function showLoadError(message) {
     location.reload();
   });
 
-  errorContainer.append(errorText, reloadButton);
+  errorContainer.append(errorMessage, reloadButton);
   document.body.append(errorContainer);
 }
 
-async function startApp() {
+async function initializeApplication() {
   try {
-    const photos = await loadPhotos();
-    displayPhotos(photos);
-    initFilters(photos);
-  } catch (error) {
-    showLoadError(error.message);
+    const userPhotos = await loadPhotos();
+    displayPhotos(userPhotos);
+    initializePhotoFilters(userPhotos);
+  } catch (loadingError) {
+    displayLoadingError(loadingError.message);
   }
 }
 
-startApp();
+initializeApplication();

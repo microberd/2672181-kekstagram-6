@@ -94,6 +94,12 @@ main {
           transform: translateY(1px);
 }
 
+.pristine-error {
+    color: #ff0000;
+    font-size: 12px;
+    display: block;
+    margin-top: 5px;
+  }
 
 /**
  * Оверлей под экранами

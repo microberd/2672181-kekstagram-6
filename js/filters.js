@@ -1,92 +1,93 @@
-import { showPhotos } from './thumbnails.js';
+import { displayPhotoCollection } from './thumbnails.js';
 
-const RANDOM_PHOTOS_COUNT = 10;
-const DEBOUNCE_DELAY = 500;
-
+const RANDOM_PHOTOS_LIMIT = 10;
+const FILTER_DELAY = 500;
 const FilterType = {
   DEFAULT: 'filter-default',
   RANDOM: 'filter-random',
   DISCUSSED: 'filter-discussed'
 };
 
-let allPhotos = [];
-let currentFilter = FilterType.DEFAULT;
-let timeoutId = null;
+let allUserPhotos = [];
+let activeFilter = FilterType.DEFAULT;
+let filterTimeout = null;
 
-function getRandomPhotos(photos) {
-  const selectedIndexes = new Set();
-  const result = [];
+function selectRandomPhotos(photos) {
+  const photoIndices = new Set();
+  const selectedPhotos = [];
 
-  if (photos.length <= RANDOM_PHOTOS_COUNT) {
+  if (photos.length <= RANDOM_PHOTOS_LIMIT) {
     return [...photos];
   }
 
-  while (selectedIndexes.size < RANDOM_PHOTOS_COUNT) {
+  while (photoIndices.size < RANDOM_PHOTOS_LIMIT) {
     const randomIndex = Math.floor(Math.random() * photos.length);
-    if (!selectedIndexes.has(randomIndex)) {
-      selectedIndexes.add(randomIndex);
-      result.push(photos[randomIndex]);
+    if (!photoIndices.has(randomIndex)) {
+      photoIndices.add(randomIndex);
+      selectedPhotos.push(photos[randomIndex]);
     }
   }
 
-  return result;
+  return selectedPhotos;
 }
 
-function getDiscussedPhotos(photos) {
-  return [...photos].sort((a, b) => b.comments.length - a.comments.length);
+function sortByComments(photos) {
+  return [...photos].sort((firstPhoto, secondPhoto) =>
+    secondPhoto.comments.length - firstPhoto.comments.length
+  );
 }
 
-function applyFilter() {
-  let filteredPhotos;
+function applyActiveFilter() {
+  let filteredResults;
 
-  if (currentFilter === FilterType.RANDOM) {
-    filteredPhotos = getRandomPhotos(allPhotos);
-  } else if (currentFilter === FilterType.DISCUSSED) {
-    filteredPhotos = getDiscussedPhotos(allPhotos);
+  if (activeFilter === FilterType.RANDOM) {
+    filteredResults = selectRandomPhotos(allUserPhotos);
+  } else if (activeFilter === FilterType.DISCUSSED) {
+    filteredResults = sortByComments(allUserPhotos);
   } else {
-    filteredPhotos = allPhotos;
+    filteredResults = allUserPhotos;
   }
 
-  showPhotos(filteredPhotos);
+  displayPhotoCollection(filteredResults);
 }
 
-function debounceFilter() {
-  if (timeoutId) {
-    clearTimeout(timeoutId);
+function delayFilterUpdate() {
+  if (filterTimeout) {
+    clearTimeout(filterTimeout);
   }
 
-  timeoutId = setTimeout(() => {
-    applyFilter();
-    timeoutId = null;
-  }, DEBOUNCE_DELAY);
+  filterTimeout = setTimeout(() => {
+    applyActiveFilter();
+    filterTimeout = null;
+  }, FILTER_DELAY);
 }
 
-function onFilterClick(evt) {
-  const button = evt.target;
+function handleFilterButtonClick(clickEvent) {
+  const clickedButton = clickEvent.target;
 
-  if (!button.classList.contains('img-filters__button')) {
+  if (!clickedButton.classList.contains('img-filters__button')) {
     return;
   }
 
-  document.querySelectorAll('.img-filters__button').forEach((btn) => {
-    btn.classList.remove('img-filters__button--active');
+  document.querySelectorAll('.img-filters__button').forEach((button) => {
+    button.classList.remove('img-filters__button--active');
   });
 
-  button.classList.add('img-filters__button--active');
-  currentFilter = button.id;
-  debounceFilter();
+  clickedButton.classList.add('img-filters__button--active');
+  activeFilter = clickedButton.id;
+  delayFilterUpdate();
 }
 
-function initFilters(photos) {
-  allPhotos = photos;
+function initializePhotoFilters(photos) {
+  allUserPhotos = photos;
 
-  const filters = document.querySelector('.img-filters');
-  filters.classList.remove('img-filters--inactive');
+  const filterSection = document.querySelector('.img-filters');
+  filterSection.classList.remove('img-filters--inactive');
 
-  const buttons = document.querySelectorAll('.img-filters__button');
-  buttons.forEach((button) => {
-    button.addEventListener('click', onFilterClick);
+  const filterButtons = document.querySelectorAll('.img-filters__button');
+  filterButtons.forEach((button) => {
+    button.addEventListener('click', handleFilterButtonClick);
   });
 }
 
-export { initFilters };
+export { initializePhotoFilters };

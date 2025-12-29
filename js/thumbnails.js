@@ -1,47 +1,48 @@
 import { showBigPhoto } from './fullscreen.js';
 
-const picturesContainer = document.querySelector('.pictures');
-const pictureTemplate = document.querySelector('#picture').content;
+const photosContainer = document.querySelector('.pictures');
+const photoTemplate = document.querySelector('#picture').content;
 
-function createPhotoElement(photo) {
-  const element = pictureTemplate.cloneNode(true);
-  const image = element.querySelector('.picture__img');
-  const likes = element.querySelector('.picture__likes');
-  const comments = element.querySelector('.picture__comments');
+function createPhotoThumbnail(photoInfo) {
+  const thumbnailElement = photoTemplate.cloneNode(true);
+  const thumbnailImage = thumbnailElement.querySelector('.picture__img');
+  const likesElement = thumbnailElement.querySelector('.picture__likes');
+  const commentsElement = thumbnailElement.querySelector('.picture__comments');
 
-  image.src = photo.url;
-  image.alt = photo.description;
-  likes.textContent = photo.likes;
-  comments.textContent = photo.comments.length;
+  thumbnailImage.src = photoInfo.url;
+  thumbnailImage.alt = photoInfo.description;
+  likesElement.textContent = photoInfo.likes;
+  commentsElement.textContent = photoInfo.comments.length;
 
-  const pictureElement = element.querySelector('.picture');
-  pictureElement.addEventListener('click', () => {
-    showBigPhoto(photo);
+  const photoLink = thumbnailElement.querySelector('.picture');
+  photoLink.addEventListener('click', (event) => {
+    event.preventDefault();
+    showBigPhoto(photoInfo);
   });
 
-  return element;
+  return thumbnailElement;
 }
 
-function clearPhotos() {
-  const pictures = picturesContainer.querySelectorAll('.picture');
-  pictures.forEach((picture) => {
-    picture.remove();
+function removeExistingThumbnails() {
+  const existingThumbnails = photosContainer.querySelectorAll('.picture');
+  existingThumbnails.forEach((thumbnail) => {
+    thumbnail.remove();
   });
 }
 
-function showPhotos(photos) {
-  clearPhotos();
+function renderPhotoThumbnails(photosArray) {
+  removeExistingThumbnails();
 
-  const fragment = document.createDocumentFragment();
-  photos.forEach((photo) => {
-    fragment.appendChild(createPhotoElement(photo));
+  const thumbnailsFragment = document.createDocumentFragment();
+  photosArray.forEach((photo) => {
+    thumbnailsFragment.appendChild(createPhotoThumbnail(photo));
   });
 
-  picturesContainer.appendChild(fragment);
+  photosContainer.appendChild(thumbnailsFragment);
 }
 
-function displayPhotos(photos) {
-  showPhotos(photos);
+function displayPhotoCollection(photosArray) {
+  renderPhotoThumbnails(photosArray);
 }
 
-export { displayPhotos, showPhotos };
+export { renderPhotoThumbnails as displayPhotos, displayPhotoCollection };

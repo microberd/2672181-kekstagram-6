@@ -1,82 +1,88 @@
-const SERVER_URL = 'https://29.javascript.htmlacademy.pro/kekstagram';
+const API_BASE_URL = 'https://29.javascript.htmlacademy.pro/kekstagram/';
 
-const ErrorText = {
-  GET_DATA: 'Не удалось загрузить фотографии',
-  SEND_DATA: 'Ошибка отправки формы'
+const ErrorMessage = {
+  LOAD_FAILED: 'Не удалось загрузить фотографии',
+  UPLOAD_FAILED: 'Ошибка отправки формы'
 };
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
+const MAX_ATTEMPTS = 3;
+const RETRY_WAIT_TIME = 1000;
 
-async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES) {
+async function fetchWithRetries(url, options = {}, attemptsLeft = MAX_ATTEMPTS) {
   try {
-    const response = await fetch(url, options);
+    const serverResponse = await fetch(url, options);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    if (!serverResponse.ok) {
+      throw new Error(`HTTP ${serverResponse.status}`);
     }
 
-    return await response.json();
-  } catch (error) {
-    if (retries > 0) {
+    return await serverResponse.json();
+  } catch (fetchError) {
+    if (attemptsLeft > 0) {
       await new Promise((resolve) => {
-        setTimeout(resolve, RETRY_DELAY);
+        setTimeout(resolve, RETRY_WAIT_TIME);
       });
-      return fetchWithRetry(url, options, retries - 1);
+      return fetchWithRetries(url, options, attemptsLeft - 1);
     }
-    throw error;
+    throw fetchError;
   }
 }
 
-async function loadPhotos() {
+async function loadUserPhotos() {
   try {
-    return await fetchWithRetry(`${SERVER_URL}/data`);
-  } catch (error) {
-    throw new Error(ErrorText.GET_DATA);
+    return await fetchWithRetries(`${API_BASE_URL}data`);
+  } catch (loadError) {
+    throw new Error(ErrorMessage.LOAD_FAILED);
   }
 }
 
-function showUploadErrorMessage() {
-  const template = document.querySelector('#error');
-  const element = template.content.cloneNode(true);
-  document.body.append(element);
+function displayUploadError() {
+  const errorTemplate = document.querySelector('#error');
+  const errorElement = errorTemplate.content.cloneNode(true);
+  document.body.append(errorElement);
 
-  const message = document.querySelector('.error');
-  const closeBtn = message.querySelector('.error__button');
+  const errorMessage = document.querySelector('.error');
+  const closeButton = errorMessage.querySelector('.error__button');
 
-  function closeMessage() {
-    message.remove();
-    document.removeEventListener('keydown', onEsc);
-    document.removeEventListener('click', onClick);
+  function removeErrorMessage() {
+    errorMessage.remove();
+    document.removeEventListener('keydown', handleEscapeKey);
+    document.removeEventListener('click', handleOutsideClick);
   }
 
-  function onEsc(evt) {
-    if (evt.key === 'Escape') {
-      closeMessage();
+  function handleEscapeKey(keyboardEvent) {
+    if (keyboardEvent.key === 'Escape') {
+      removeErrorMessage();
     }
   }
 
-  function onClick(evt) {
-    if (!message.contains(evt.target)) {
-      closeMessage();
+  function handleOutsideClick(clickEvent) {
+    if (!errorMessage.contains(clickEvent.target)) {
+      removeErrorMessage();
     }
   }
 
-  closeBtn.addEventListener('click', closeMessage);
-  document.addEventListener('keydown', onEsc);
-  document.addEventListener('click', onClick);
+  closeButton.addEventListener('click', removeErrorMessage);
+  document.addEventListener('keydown', handleEscapeKey);
+  document.addEventListener('click', handleOutsideClick);
 }
 
-async function sendForm(formData) {
+async function uploadFormData(formData) {
   try {
-    return await fetchWithRetry(SERVER_URL, {
+    const serverResponse = await fetch(API_BASE_URL, {
       method: 'POST',
       body: formData
     });
-  } catch (error) {
-    showUploadErrorMessage();
-    throw new Error(ErrorText.SEND_DATA);
+
+    if (!serverResponse.ok) {
+      throw new Error(ErrorMessage.UPLOAD_FAILED);
+    }
+
+    return await serverResponse.json();
+  } catch (uploadError) {
+    displayUploadError();
+    throw new Error(ErrorMessage.UPLOAD_FAILED);
   }
 }
 
-export { loadPhotos, sendForm };
+export { loadUserPhotos as loadPhotos, uploadFormData as sendForm };
