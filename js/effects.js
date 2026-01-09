@@ -1,13 +1,13 @@
 import '../vendor/nouislider.js';
 const { noUiSlider } = window;
-const SCALE_CONTROL_VALUE = document.querySelector('.scale__control--value');
-const SCALE_CONTROL_SMALLER = document.querySelector('.scale__control--smaller');
-const SCALE_CONTROL_BIGGER = document.querySelector('.scale__control--bigger');
-const PREVIEW_IMAGE = document.querySelector('.img-upload__preview img');
-const EFFECTS_CONTAINER = document.querySelector('.effects__list');
-const EFFECT_LEVEL_CONTAINER = document.querySelector('.img-upload__effect-level');
-const EFFECT_LEVEL_VALUE = document.querySelector('.effect-level__value');
-const EFFECT_SLIDER = document.querySelector('.effect-level__slider');
+const scaleControlValue = document.querySelector('.scale__control--value');
+const scaleSmallerButton = document.querySelector('.scale__control--smaller');
+const scaleBiggerButton = document.querySelector('.scale__control--bigger');
+const previewImage = document.querySelector('.img-upload__preview img');
+const effectsContainer = document.querySelector('.effects__list');
+const effectLevelContainer = document.querySelector('.img-upload__effect-level');
+const effectLevelValue = document.querySelector('.effect-level__value');
+const effectSlider = document.querySelector('.effect-level__slider');
 const DEFAULT_SCALE = 100;
 const SCALE_STEP = 25;
 const MIN_SCALE = 25;
@@ -20,8 +20,9 @@ const scaleState = {
 };
 
 function updateScaleDisplay() {
-  SCALE_CONTROL_VALUE.value = `${scaleState.value}%`;
-  PREVIEW_IMAGE.style.transform = `scale(${scaleState.value / 100})`;
+  scaleControlValue.value = `${scaleState.value}%`;
+  scaleControlValue.setAttribute('value', `${scaleState.value}%`);
+  previewImage.style.transform = `scale(${scaleState.value / 100})`;
 }
 
 function resetScaleToDefault() {
@@ -44,15 +45,15 @@ function increaseScale() {
 }
 
 function initializeSlider() {
-  noUiSlider.create(EFFECT_SLIDER, {
+  noUiSlider.create(effectSlider, {
     range: { min: 0, max: 100 },
     start: 100,
     step: 1,
     connect: 'lower'
   });
 
-  EFFECT_SLIDER.noUiSlider.on('update', () => {
-    const sliderValue = EFFECT_SLIDER.noUiSlider.get();
+  effectSlider.noUiSlider.on('update', () => {
+    const sliderValue = effectSlider.noUiSlider.get();
     applyEffectFromSlider(sliderValue);
   });
 }
@@ -62,8 +63,8 @@ function applyEffectFromSlider(sliderValue) {
   const activeEffect = document.querySelector('input[name="effect"]:checked').value;
 
   if (activeEffect === 'none') {
-    EFFECT_LEVEL_VALUE.value = '';
-    PREVIEW_IMAGE.style.filter = 'none';
+    effectLevelValue.value = '';
+    previewImage.style.filter = 'none';
     return;
   }
 
@@ -120,8 +121,8 @@ function applyEffectFromSlider(sliderValue) {
     filterStyle = `brightness(${displayValue})`;
   }
 
-  EFFECT_LEVEL_VALUE.value = displayValue;
-  PREVIEW_IMAGE.style.filter = filterStyle;
+  effectLevelValue.value = displayValue;
+  previewImage.style.filter = filterStyle;
 }
 
 function handleEffectChange(evt) {
@@ -129,35 +130,35 @@ function handleEffectChange(evt) {
     return;
   }
 
-  if (EFFECT_SLIDER.noUiSlider) {
-    EFFECT_SLIDER.noUiSlider.set(100);
+  if (effectSlider.noUiSlider) {
+    effectSlider.noUiSlider.set(100);
   }
 
   const activeEffect = evt.target.value;
   if (activeEffect === 'none') {
-    EFFECT_LEVEL_CONTAINER.classList.add('hidden');
-    EFFECT_LEVEL_VALUE.value = '';
-    PREVIEW_IMAGE.style.filter = 'none';
+    effectLevelContainer.classList.add('hidden');
+    effectLevelValue.value = '';
+    previewImage.style.filter = 'none';
   } else {
-    EFFECT_LEVEL_CONTAINER.classList.remove('hidden');
+    effectLevelContainer.classList.remove('hidden');
     applyEffectFromSlider(100);
   }
 }
 
 function resetAllEffects() {
   document.querySelector('#effect-none').checked = true;
-  EFFECT_LEVEL_CONTAINER.classList.add('hidden');
-  EFFECT_LEVEL_VALUE.value = '';
-  PREVIEW_IMAGE.style.filter = 'none';
+  effectLevelContainer.classList.add('hidden');
+  effectLevelValue.value = '';
+  previewImage.style.filter = 'none';
 
-  if (EFFECT_SLIDER.noUiSlider) {
-    EFFECT_SLIDER.noUiSlider.set(100);
+  if (effectSlider.noUiSlider) {
+    effectSlider.noUiSlider.set(100);
   }
 }
 
-EFFECTS_CONTAINER.addEventListener('change', handleEffectChange);
-SCALE_CONTROL_SMALLER.addEventListener('click', decreaseScale);
-SCALE_CONTROL_BIGGER.addEventListener('click', increaseScale);
+effectsContainer.addEventListener('change', handleEffectChange);
+scaleSmallerButton.addEventListener('click', decreaseScale);
+scaleBiggerButton.addEventListener('click', increaseScale);
 
 initializeSlider();
 resetScaleToDefault();

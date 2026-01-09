@@ -1,18 +1,18 @@
-import { sendForm } from './api.js';
+import { sendForm, showErrorMessage } from './api.js';
 import { resetEffects, resetScale } from './effects.js';
 
-const FORM_ELEMENT = document.querySelector('.img-upload__form');
-const UPLOAD_INPUT = document.querySelector('.img-upload__input');
-const OVERLAY_ELEMENT = document.querySelector('.img-upload__overlay');
-const CANCEL_BUTTON = document.querySelector('.img-upload__cancel');
-const HASHTAGS_FIELD = FORM_ELEMENT.querySelector('.text__hashtags');
-const COMMENT_FIELD = FORM_ELEMENT.querySelector('.text__description');
-const SUBMIT_BUTTON = FORM_ELEMENT.querySelector('.img-upload__submit');
-const PREVIEW_IMAGE = document.querySelector('.img-upload__preview img');
-const EFFECT_PREVIEWS = document.querySelectorAll('.effects__preview');
+const formElement = document.querySelector('.img-upload__form');
+const uploadInput = document.querySelector('.img-upload__input');
+const overlayElement = document.querySelector('.img-upload__overlay');
+const cancelButton = document.querySelector('.img-upload__cancel');
+const hashtagsField = formElement.querySelector('.text__hashtags');
+const commentField = formElement.querySelector('.text__description');
+const submitButton = formElement.querySelector('.img-upload__submit');
+const previewImage = document.querySelector('.img-upload__preview img');
+const effectPreviews = document.querySelectorAll('.effects__preview');
 const MAX_HASHTAGS_COUNT = 5;
 const MAX_COMMENT_LENGTH = 140;
-const pristineValidator = new Pristine(FORM_ELEMENT, {
+const pristineValidator = new Pristine(formElement, {
   classTo: 'img-upload__field-wrapper',
   errorClass: 'form__item--invalid',
   successClass: 'form__item--valid',
@@ -51,25 +51,25 @@ function validateComment(value) {
 }
 
 pristineValidator.addValidator(
-  HASHTAGS_FIELD,
+  hashtagsField,
   validateHashtags,
   'Некорректные хэш-теги'
 );
 
 pristineValidator.addValidator(
-  COMMENT_FIELD,
+  commentField,
   validateComment,
   'Комментарий не более 140 символов'
 );
 
 function disableSubmitButton() {
-  SUBMIT_BUTTON.disabled = true;
-  SUBMIT_BUTTON.textContent = 'Публикую...';
+  submitButton.disabled = true;
+  submitButton.textContent = 'Публикую...';
 }
 
 function enableSubmitButton() {
-  SUBMIT_BUTTON.disabled = false;
-  SUBMIT_BUTTON.textContent = 'Опубликовать';
+  submitButton.disabled = false;
+  submitButton.textContent = 'Опубликовать';
 }
 
 function showSuccessMessage() {
@@ -111,42 +111,42 @@ function stopEscapePropagation(evt) {
 }
 
 function handleFileSelection() {
-  const selectedFile = UPLOAD_INPUT.files[0];
+  const selectedFile = uploadInput.files[0];
 
   if (!selectedFile) {
     return;
   }
 
-  if (PREVIEW_IMAGE.src.startsWith('blob:')) {
-    URL.revokeObjectURL(PREVIEW_IMAGE.src);
+  if (previewImage.src.startsWith('blob:')) {
+    URL.revokeObjectURL(previewImage.src);
   }
 
   const imageUrl = URL.createObjectURL(selectedFile);
-  PREVIEW_IMAGE.src = imageUrl;
+  previewImage.src = imageUrl;
 
-  EFFECT_PREVIEWS.forEach((preview) => {
+  effectPreviews.forEach((preview) => {
     preview.style.backgroundImage = `url(${imageUrl})`;
   });
 
-  OVERLAY_ELEMENT.classList.remove('hidden');
+  overlayElement.classList.remove('hidden');
   document.body.classList.add('modal-open');
   resetScale();
   resetEffects();
 }
 
 function closeUploadForm() {
-  OVERLAY_ELEMENT.classList.add('hidden');
+  overlayElement.classList.add('hidden');
   document.body.classList.remove('modal-open');
-  FORM_ELEMENT.reset();
+  formElement.reset();
   pristineValidator.reset();
   resetEffects();
   resetScale();
 
-  if (PREVIEW_IMAGE.src.startsWith('blob:')) {
-    URL.revokeObjectURL(PREVIEW_IMAGE.src);
-    PREVIEW_IMAGE.src = 'img/upload-default-image.jpg';
+  if (previewImage.src.startsWith('blob:')) {
+    URL.revokeObjectURL(previewImage.src);
+    previewImage.src = 'img/upload-default-image.jpg';
 
-    EFFECT_PREVIEWS.forEach((preview) => {
+    effectPreviews.forEach((preview) => {
       preview.style.backgroundImage = '';
     });
   }
@@ -157,9 +157,14 @@ function onCancelClick() {
 }
 
 function onFormEscapePress(evt) {
+  const errorPopup = document.querySelector('.error');
+  if (errorPopup) {
+    return;
+  }
+
   if (evt.key === 'Escape' &&
-      !HASHTAGS_FIELD.matches(':focus') &&
-      !COMMENT_FIELD.matches(':focus')) {
+      !hashtagsField.matches(':focus') &&
+      !commentField.matches(':focus')) {
     closeUploadForm();
   }
 }
@@ -175,24 +180,24 @@ async function handleFormSubmit(evt) {
 
   disableSubmitButton();
 
-  const formData = new FormData(FORM_ELEMENT);
+  const formData = new FormData(formElement);
 
   try {
     await sendForm(formData);
     closeUploadForm();
     showSuccessMessage();
   } catch (error) {
-    // Всё уже в api.js
+    showErrorMessage();
   } finally {
     enableSubmitButton();
   }
 }
 
-HASHTAGS_FIELD.addEventListener('keydown', stopEscapePropagation);
-COMMENT_FIELD.addEventListener('keydown', stopEscapePropagation);
-UPLOAD_INPUT.addEventListener('change', handleFileSelection);
-CANCEL_BUTTON.addEventListener('click', onCancelClick);
+hashtagsField.addEventListener('keydown', stopEscapePropagation);
+commentField.addEventListener('keydown', stopEscapePropagation);
+uploadInput.addEventListener('change', handleFileSelection);
+cancelButton.addEventListener('click', onCancelClick);
 document.addEventListener('keydown', onFormEscapePress);
-FORM_ELEMENT.addEventListener('submit', handleFormSubmit);
+formElement.addEventListener('submit', handleFormSubmit);
 
 export { closeUploadForm };

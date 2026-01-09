@@ -37,17 +37,25 @@ async function loadUserPhotos() {
 }
 
 function displayUploadError() {
+  const uploadOverlay = document.querySelector('.img-upload__overlay');
+  if (uploadOverlay) {
+    uploadOverlay.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+  }
+
   const errorTemplate = document.querySelector('#error');
   const errorElement = errorTemplate.content.cloneNode(true);
-  document.body.append(errorElement);
-
-  const errorMessage = document.querySelector('.error');
+  const errorMessage = errorElement.querySelector('.error');
   const closeButton = errorMessage.querySelector('.error__button');
 
   function removeErrorMessage() {
     errorMessage.remove();
     document.removeEventListener('keydown', handleEscapeKey);
     document.removeEventListener('click', handleOutsideClick);
+    if (uploadOverlay) {
+      uploadOverlay.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
   }
 
   function handleEscapeKey(keyboardEvent) {
@@ -65,6 +73,14 @@ function displayUploadError() {
   closeButton.addEventListener('click', removeErrorMessage);
   document.addEventListener('keydown', handleEscapeKey);
   document.addEventListener('click', handleOutsideClick);
+
+  errorMessage.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Escape') {
+      evt.stopPropagation();
+    }
+  });
+
+  document.body.append(errorElement);
 }
 
 async function uploadFormData(formData) {
@@ -85,4 +101,4 @@ async function uploadFormData(formData) {
   }
 }
 
-export { loadUserPhotos as loadPhotos, uploadFormData as sendForm };
+export { loadUserPhotos as loadPhotos, uploadFormData as sendForm, displayUploadError as showErrorMessage };
